@@ -6,6 +6,7 @@ import urllib.parse as quote
 import re
 import os
 import configparser
+import time
 
 def adifFixup(rec):
     if 'band' in rec and not 'band_rx' not in rec:
@@ -58,6 +59,7 @@ print ("eQsl Downloader")
 BASE_URL = 'http://www.eqsl.cc'
 MYCALL = ''
 MYPASS = ''
+MYQTH = ''
 USER_HOME = os.path.expanduser("~")
 APP_CONFIG_DIR = os.path.join(USER_HOME, ".eqslloader")
 APP_CONFIG = os.path.join(APP_CONFIG_DIR,"config")
@@ -72,6 +74,7 @@ try:
     config.read(APP_CONFIG)
     MYCALL = config['GENERAL']['MYCALL']
     MYPASS = config['GENERAL']['MYPASS']
+    MYQTH = config['GENERAL']['MYQTH']
     DATA_DIR = config['GENERAL']['DATA_DIR']
 except Exception as e:
     print ("Error", e);
@@ -81,10 +84,13 @@ if MYCALL == '' or MYPASS == '':
     print ("eQSL account information.")
     MYCALL = input("Callsign : ")
     MYPASS = input("Password : ")
+    MYQTH = input("Qth : ")
+    DATA_DIR = input("Data Dir (e.g. /eqsl_card) : ")
     print ("Save config to ", APP_CONFIG)
     config.add_section('GENERAL')
     config.set('GENERAL', 'MYCALL', MYCALL)
     config.set('GENERAL', 'MYPASS', MYPASS)
+    config.set('GENERAL', 'MYQTH', MYQTH)
     config.set('GENERAL', 'DATA_DIR', DATA_DIR)
     config.write(open(APP_CONFIG, 'w'))
 
@@ -100,7 +106,7 @@ url_opener = request.build_opener( request.HTTPHandler(debuglevel=0), request.HT
 request.install_opener(url_opener)
 
 print ("Login")
-p = parse.urlencode( { 'Callsign': MYCALL, 'EnteredPassword' : MYPASS, 'Login' : 'Go'} ).encode("utf-8")
+p = parse.urlencode( { 'Callsign': MYCALL, 'EnteredPassword' : MYPASS, 'Login' : 'Go', 'QTHNickname' : MYQTH} ).encode("utf-8")
 response = request.urlopen(BASE_URL + '/qslcard/LoginFinish.cfm', p)
 data = response.read()
 print ("List ADI file")
@@ -130,6 +136,8 @@ if m :
 				local_file.write(image_response.read())
 				local_file.close()
 				card_download_count += 1
+                # add delay
+				time.sleep(10)
 			else :
 				print ("Unable to find image")
 else :	
