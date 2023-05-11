@@ -127,8 +127,7 @@ if m:
     for log in logs:
         LOG_COUNT += 1
         output_file = (
-            DATA_DIR
-            + "/"
+            "/"
             + log["qso_date"]
             + "-"
             + log["time_on"]
@@ -138,8 +137,8 @@ if m:
             + log["mode"]
             + "-"
             + log["call"].replace("/", "-")
-            + ".png"
         )
+        output_file = (DATA_DIR + output_file.upper() + ".png")
         if not os.path.isfile(output_file):
             card_url = (
                 "/qslcard/DisplayQSL.cfm?Callsign="
